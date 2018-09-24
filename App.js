@@ -3,10 +3,7 @@ import { AppRegistry, Image, View, Button, TouchableOpacity, TouchableHighlight,
 // import NfcOption from './components/NfcOption'
 import FBLoginButton from './components/FBLoginButton'
 import FBShareButton from './components/FBShareButton'
-
-
-
-
+import CameraApp from './components/Camera'
 
 export default class App extends Component {
   // _fbAuth(){
@@ -44,7 +41,8 @@ export default class App extends Component {
       // <NfcOption/>
       <View>
       <FBLoginButton/>
-      <FBShareButton/>
+      {/* <FBShareButton/> */}
+      {/* <CameraApp/> */}
       </View>
     );
   }
