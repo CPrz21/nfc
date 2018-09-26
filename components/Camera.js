@@ -30,7 +30,7 @@ export default class App extends Component {
             videoSource: null
         };
     }
-
+  
 
   selectPhotoTapped() {
       var tmp=this;
@@ -102,6 +102,7 @@ export default class App extends Component {
       }
     });
   }
+  
 
   selectVideoTapped() {
     const options = {
@@ -131,6 +132,55 @@ export default class App extends Component {
     });
   }
 
+
+  
+  sharePic(){
+    const pick =this.state.avatarSource.uri;
+    const sharePhotoContent = {
+      contentType : 'photo',
+      photos: [{ imageUrl: pick }]
+      }
+      //console.log(this.state.avatarSource);
+  
+      ShareDialog.show(sharePhotoContent);
+    }
+
+    shareLinkWithShareDialog() {
+      const pick =this.state.avatarSource.uri;
+      let shareLinkContent = {
+            contentType : 'photo',
+            photos: [{ imageUrl: pick }],
+            contentDescription: 'BT7 sharing is easy!'
+            }
+      
+       ShareDialog.canShow(shareLinkContent).then((canShow) => {
+      
+      if (canShow) return ShareDialog.show(shareLinkContent);
+      
+       }
+      
+      ).then((result) => {
+      
+       if (result.isCancelled) {
+      
+        alert('Share cancelled');
+      
+       } else {
+      
+         alert('Share success with postId: ' + result.postId);
+      
+         }
+      
+        },
+      
+        function(error) {
+      
+        alert('Share fail with error: ' + error);
+            }
+          );
+     }
+
+
   render() {
     return (
       <View>
@@ -141,7 +191,7 @@ export default class App extends Component {
           }
           </View>
         </TouchableOpacity>
-
+        <Button onPress={() => this.sharePic()} title="press me"></Button>
       </View>
     );
   }
