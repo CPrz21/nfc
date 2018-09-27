@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   avatar: {
-    borderRadius: 20,
+    borderRadius: 75,
     width: 150,
     height: 150
   }

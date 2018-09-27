@@ -13,7 +13,7 @@ export default class FBLoginButton extends Component {
                 console.log('Login success with permissions: ' + JSON.stringify(result));
 
             AccessToken.getCurrentAccessToken().then((data) => {
-                
+                console.log(data);
                 const { accessToken } = data
 
                 fetch(`https://graph.facebook.com/me?access_token=${data.accessToken.toString()}&fields=id,name,email,picture`)
