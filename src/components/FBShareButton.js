@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
 import { View, Button,TouchableHighlight, Text } from 'react-native';
 import { ShareDialog } from 'react-native-fbsdk';
+const FBSDK = require('react-native-fbsdk');
+const {
+  ShareApi,
+} = FBSDK;
 
 
 export default class FBShareButton extends Component {
@@ -11,6 +15,8 @@ export default class FBShareButton extends Component {
             contentUrl: 'https://bt7festival.com/',
             contentDescription: 'Wow, check out this great site BT7!'
         };
+        
+
 
         this.state = {
             shareLinkContent: shareLinkContent,
@@ -39,6 +45,8 @@ export default class FBShareButton extends Component {
         }
         );
     }
+
+    
     render() {
         return (
         <View>
