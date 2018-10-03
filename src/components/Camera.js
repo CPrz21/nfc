@@ -184,14 +184,15 @@ export default class App extends Component {
   render() {
     return (
       <View>
-        <TouchableOpacity onPress={() => this.selectPhotoTapped()}>
-          <View style={[styles.avatar, styles.avatarContainer, {marginBottom: 20}]}>
-          { this.state.avatarSource === null ? <Text>Select a Photo</Text> :
-            <Image style={styles.avatar} source={this.state.avatarSource} />
-          }
-          </View>
-        </TouchableOpacity>
-        <Button onPress={() => this.sharePic()} title="press me"></Button>
+
+          <TouchableOpacity onPress={() => this.selectPhotoTapped()}>
+            <View style={[styles.avatar, styles.avatarContainer, {marginBottom: 20}]}>
+            { this.state.avatarSource === null ? <Text>Select a Photo</Text> :
+              <Image style={styles.avatar} source={this.state.avatarSource} />
+            }
+            </View>
+          </TouchableOpacity>
+          <Button onPress={() => this.sharePic()} title="press me"></Button>
       </View>
     );
   }

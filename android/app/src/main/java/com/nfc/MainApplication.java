@@ -3,6 +3,11 @@ package com.nfc;
 import android.app.Application;
 
 import com.facebook.react.ReactApplication;
+import com.reactlibrary.RNRootViewBackgroundPackage;
+import community.revteltech.nfc.NfcManagerPackage;
+import com.imagepicker.ImagePickerPackage;
+import com.facebook.reactnative.androidsdk.FBSDKPackage;
+import com.reactlibrary.RNRootViewBackgroundPackage;
 import com.imagepicker.ImagePickerPackage;
 import com.facebook.reactnative.androidsdk.FBSDKPackage;
 import community.revteltech.nfc.NfcManagerPackage;
@@ -37,6 +42,7 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
             new ImagePickerPackage(),
+            new RNRootViewBackgroundPackage(),
             new FBSDKPackage(mCallbackManager),
             new NfcManagerPackage()
       );

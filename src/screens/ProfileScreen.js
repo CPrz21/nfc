@@ -1,14 +1,20 @@
 import React from 'react';
-import {Button} from 'react-native';
+import {Button,View,Text} from 'react-native';
 import CameraApp from '../components/Camera'
+import FBLoginButton from '../components/FBLoginButton'
 export default class HomeScreen extends React.Component {
     static navigationOptions = {
-      title: 'Toma la foto',
+      title: 'Perfil',
     };
     render() {
       const { navigate } = this.props.navigation;
+      const { navigation } = this.props;
+      const tagId = navigation.getParam('tagId','sin tagId')
       return (
-        <CameraApp/>
+        // <CameraApp/>
+        <View>
+          <Text>{tagId}</Text>
+        </View>
       );
     }
   }

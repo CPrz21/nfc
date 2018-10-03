@@ -3,16 +3,16 @@ import {
     View,
     Text,
     Button,
-    Platform,
-    TouchableOpacity,
-    Linking,
-    TextInput,
-    ScrollView,
-    Modal
+    Image,
+    StyleSheet,
+    StatusBar
 } from 'react-native';
-import NfcManager, {Ndef} from 'react-native-nfc-manager';
+import { createStackNavigator } from 'react-navigation';
+import AppLogo from '../assets/img/evet_logo.png';
+
 
 export default class HomeScreen extends Component{
+
     static navigationOptions = {
         title: 'Home',
     };
@@ -21,13 +21,30 @@ export default class HomeScreen extends Component{
         return(
             <View>
                 <Button
-                title="Registro">
-                </Button>
+                title="Registro"
+                onPress={() =>navigate('Registry', { name: 'Jane' })}
+                />
                 <Button
                 title="PhotoBoot"
                 onPress={() =>navigate('Photo', { name: 'Jane' })}
                 />
+                {/* <Button
+                title="ProfileScreen"
+                onPress={() =>navigate('ProfileScreen', { name: 'Carlos' })}
+                /> */}
             </View>
         );
     }
 }
+
+const styles = StyleSheet.create({
+    fondo: {
+        backgroundColor:'red'
+    //   color: 'blue',
+    //   fontWeight: 'bold',
+    //   fontSize: 30,
+    },
+    red: {
+      color: 'red',
+    },
+});
