@@ -137,6 +137,9 @@ android {
 }
 
 dependencies {
+
+    // For animated GIF support
+    implementation 'com.facebook.fresco:animated-gif:1.10.0'
     implementation project(':react-native-root-view-background')
     implementation project(':react-native-image-picker')
     implementation project(':react-native-fbsdk')

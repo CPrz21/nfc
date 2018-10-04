@@ -17,7 +17,8 @@ import NfcManager, {Ndef} from 'react-native-nfc-manager';
 import ScanLogo from '../assets/img/scan.png'
 import OkIcon from '../assets/img/ok_message.png'
 import ErrorIcon from '../assets/img/error_message.png'
-import PhotoBooth from '../components/Camera'
+import Load from '../assets/img/load.gif'
+
 const ErrorColor='#E24942',
       OkColor='#30B716';
 
@@ -41,15 +42,12 @@ export default class Registro extends Component {
         this.state = {
             supported: true,
             enabled: false,
-            isWriting: false,
-            urlToWrite: 'https://www.google.com',
-            // rtdType: RtdType.URL,
-            parsedText: null,
             tag: {},
             detected:false,
             modalVisible: false,
             MessageBg:null,
-            MessageIcon:null
+            MessageIcon:null,
+            MessageTxt:null
         }
     }
 
@@ -57,8 +55,14 @@ export default class Registro extends Component {
         this.setState({modalVisible: visible});
       }
     
-    change(){
-        
+    getId(){
+        fetch('https://cpbuaenv59.execute-api.us-east-2.amazonaws.com/staging/users?rfid=046C0612524984')
+                            .then(response => {
+                            return response.json();
+                            })
+                            .then(data => {
+                            console.log(data);
+                            }).catch(error => console.error('Error:', error));
     }
 
     componentDidMount() {
@@ -79,81 +83,19 @@ export default class Registro extends Component {
             this._stateChangedSubscription.remove();
         }
     }
-    
-    render() {
-        const { navigate } = this.props.navigation;
-        let { supported, enabled, tag, detected, isWriting, urlToWrite, parsedText, rtdType } = this.state;
-        let NfcMessage;
-        if (enabled===false){
-            NfcMessage = <TouchableOpacity>
-                                <Text style={styles.message}>NFC de dispositivo está {enabled===true ? "encendido":"apagado"}</Text>
-                                <Button
-                                color="#001F45"
-                                title="Go to NFC setting"
-                                onPress={this._goToNfcSetting}
-                                />
-                          </TouchableOpacity>;
-        }else{
-            NfcMessage = <TouchableOpacity>
-                                <Text style={styles.message}>Acerque pulsera al dispositivo</Text>
-                        </TouchableOpacity>;
-        }
-        return (
-            <View style={styles.mainContainer}>
-                <View style={styles.content}>
-                    <Modal
-                    animationType="slide"
-                    transparent={false}
-                    visible={this.state.modalVisible}
-                    onShow={()=>{
-                        StatusBar.setBackgroundColor(this.state.MessageBg, true);
-                        setTimeout(()=>{
-                            StatusBar.setBackgroundColor('#001F45', true);
-                            this.setModalVisible(!this.state.modalVisible);
-                        },1500);
-                    }}
-                    onRequestClose={() => {
-                        StatusBar.setBackgroundColor('#001F45', true);
-                        this.setModalVisible(!this.state.modalVisible);
-                        // Alert.alert('Modal has been closed.');
-                    }}>
-                        <View style={[styles.modalContainer,{backgroundColor:this.state.MessageBg}]}>
-                            <View style={styles.modalContent}>
-                                <Image
-                                source={this.state.MessageIcon}
-                                />
 
-                                <TouchableHighlight
-                                    onPress={() => {
-                                        StatusBar.setBackgroundColor(this.state.MessageBg, true);
-                                        this.setModalVisible(!this.state.modalVisible);
-                                    }}>
-                                    <Text>Hide Modal</Text>
-                                </TouchableHighlight>
-                            </View>
-                        </View>
-                    </Modal>
-                
-                    <Image style={styles.nfcImg} source={ScanLogo} resizeMode="contain"/>
-                    {detected===false ? NfcMessage : <Text>Tag identificado {JSON.stringify(tag.id)}</Text>}
-                </View>
-            </View>
-        )
-    }
 
     _startNfc() {
         NfcManager.start({
             onSessionClosedIOS: () => {
                 console.log('ios session closed');
             }
+        }).then(result => {
+            console.log('start OK', result);
+        }).catch(error => {
+            console.warn('start fail', error);
+            this.setState({supported: false});
         })
-            .then(result => {
-                console.log('start OK', result);
-            })
-            .catch(error => {
-                console.warn('start fail', error);
-                this.setState({supported: false});
-            })
 
         if (Platform.OS === 'android') {
             NfcManager.getLaunchTagEvent()
@@ -198,42 +140,38 @@ export default class Registro extends Component {
     }
 
     _onTagDiscovered = tag => {
-        self = this;
-        console.log('Tag Discovered', tag);
-        if(tag===tag){
+        this.setState({
+            detected:true
+        });
+
+        fetch(`https://cpbuaenv59.execute-api.us-east-2.amazonaws.com/staging/users?rfid=${tag.id}`)
+        .then(response => {
+        return response.json();
+        })
+        .then(data => {
+        if (data){
             this.setState({
-                tag,detected:true,
+                tag,
+                detected:false,
                 modalVisible:true,
                 MessageBg:OkColor,
-                MessageIcon:OkIcon
-             });
-             self.props.navigation.navigate('Photo');
+                MessageIcon:OkIcon,
+                MessageTxt:'Tag identificado'
+            });
+            this.props.navigation.navigate('Photo', {
+                userInfo:data
+            });
         }else{
             this.setState({
-                tag,detected:true,
+                tag,
+                detected:false,
                 modalVisible:true,
                 MessageBg:ErrorColor,
-                MessageIcon:ErrorIcon
-             });
-            //self.props.navigation.navigate('Photo');
+                MessageIcon:ErrorIcon,
+                MessageTxt:'Tag no identificado'
+            });
         }
-        
-        // this.setState({ tag,detected:true,modalVisible:true });
-        let url = this._parseUri(tag);
-        if (url) {
-            Linking.openURL(url)
-                .catch(err => {
-                    console.warn(err);
-                })
-        }
-
-        let text = this._parseText(tag);
-        this.setState({parsedText: text});
-    }
-
-
-    _clearMessages = () => {
-        this.setState({tag: null});
+        }).catch(error => console.error('Error:', error));
     }
 
     _goToNfcSetting = () => {
@@ -268,7 +206,54 @@ export default class Registro extends Component {
         }
         return null;
     }
+    
+    render() {
+        const { navigate } = this.props.navigation;
+        let { supported, enabled, tag, detected } = this.state;
+        return (
+            <View style={styles.mainContainer}>
+                <View style={styles.content}>
+                    <Modal
+                    animationType="slide"
+                    transparent={false}
+                    visible={this.state.modalVisible}
+                    onShow={()=>{
+                        StatusBar.setBackgroundColor(this.state.MessageBg, true);
+                        setTimeout(()=>{
+                            StatusBar.setBackgroundColor('#001F45', true);
+                            this.setModalVisible(!this.state.modalVisible);
+                        },1500);
+                    }}
+                    onRequestClose={() => {
+                        StatusBar.setBackgroundColor('#001F45', true);
+                        this.setModalVisible(!this.state.modalVisible);
+                    }}>
+                        <View style={[styles.modalContainer,{backgroundColor:this.state.MessageBg}]}>
+                            <View style={styles.modalContent}>
+                                <Image
+                                source={this.state.MessageIcon}
+                                />
 
+                                <TouchableHighlight
+                                    onPress={() => {
+                                        StatusBar.setBackgroundColor(this.state.MessageBg, true);
+                                        this.setModalVisible(!this.state.modalVisible);
+                                    }}>
+                                    <Text style={styles.modalText}>{this.state.MessageTxt}</Text>
+                                </TouchableHighlight>
+                            </View>
+                        </View>
+                    </Modal>
+                
+                    <Image style={styles.nfcImg} source={ScanLogo} resizeMode="contain"/>
+                    <Text style={styles.message}>Acerque pulsera al dispositivo</Text>
+                    { this.state.detected && 
+                    <Image source={Load}/>
+                    }
+                </View>
+            </View>
+        )
+    }
   }
 
   //STYLES
@@ -287,7 +272,8 @@ export default class Registro extends Component {
             marginTop: 20,
             marginBottom:20,
             textAlign:'center',
-            fontFamily:"MuliRegular"
+            fontFamily:"MuliRegular",
+            fontSize:16
         },
         modalContainer:{
             flex: 1,
@@ -298,7 +284,15 @@ export default class Registro extends Component {
             justifyContent:"center",
             alignItems:"center"
         },
+        modalText:{
+            fontFamily:"MuliBold",
+            color:"white",
+            textAlign:"center",
+            marginTop:20
+            
+        },
         nfcImg:{
-            height:300
+            height:250,
+            width:250
         }
     });
