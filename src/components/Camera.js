@@ -5,12 +5,13 @@ import {
   View,
   PixelRatio,
   TouchableOpacity,
-  TouchableHighlight,
   Image,
   Button
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
-const axios = require('axios');
+import LoadIcon from '../assets/img/load.gif'
+import SharedIcon from '../assets/img/thumbs_up.png'
+import ModalMessage from '../components/Message'
 import {aws} from '../keys/keys'
 import {RNS3} from 'react-native-aws3'
 
@@ -23,6 +24,9 @@ export default class App extends Component {
             avatarSource: null,
             videoSource: null,
             load:false,
+            MessageBg:null,
+            MessageIcon:null,
+            MessageTxt:null
         };
     }
   
@@ -95,20 +99,11 @@ export default class App extends Component {
           }
 
         });
-      
-     
-      // formData.append('data', response)
-      // axios.post(apiUrl, formData, {
-      //   headers: {
-      //     'Content-Type': response.type
-      //   }
-      // }).catch((error) => {
-      //   console.log(error.response);
-      // });
 
       }
     });
   }
+
 
   render() {
     return (
@@ -116,23 +111,28 @@ export default class App extends Component {
 
           <TouchableOpacity onPress={() => this.selectPhotoTapped()}>
             <View style={[styles.avatarContainer,styles.avatar]}>
-            {/* { this.state.avatarSource === null ? <Text style={styles.PhotoTxt}>Seleccciona la foto</Text> :
+            {/* { this.state.avatarSource === null ? <Text style={styles.PhotoTxt}>{this.state.load===false ? 'Seleccione la foto' : 'Cargando foto...'}</Text> :
               <Image style={styles.avatar} source={this.state.avatarSource} />
             } */}
-            { this.state.avatarSource === null ? <Text style={styles.PhotoTxt}>{this.state.load===false ? 'Seleccione la foto' : 'Cargando foto...'}</Text> :
+            { this.state.avatarSource === null ? (this.state.load===false ? <Text style={styles.PhotoTxt}>{`Seleccione la foto`}</Text> : <Image source={LoadIcon}/>) :
               <Image style={styles.avatar} source={this.state.avatarSource} />
             }
             </View>
           </TouchableOpacity>
-          {/* <Text>SRC {JSON.stringify(this.state.avatarSource)}</Text> */}
           <Button
           containerStyle={{ marginTop: 20 }}
           color="#001F45"
           title="Compartir Foto"
           onPress={()=>{
-            alert('imagen compartida!')
+            this.setState({
+              MessageBg:'#3b5998',
+              MessageIcon:SharedIcon,
+              MessageTxt:'Imagen Compartida con éxito'
+            });
+            this.refs.modal.show();
           }}
           />
+          <ModalMessage container={this} ref = "modal" bgColor={this.state.MessageBg} message={this.state.MessageTxt} icon={this.state.MessageIcon}/>
       </View>
     );
   }

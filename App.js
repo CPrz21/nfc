@@ -17,7 +17,7 @@ export default class App extends Component{
       StatusBar.setBackgroundColor('#001F45', true);
       
       const RootStack = createStackNavigator({
-          Home: { screen: CheckNfc },
+          Home: { screen: Camera },
           Photo: {screen: Photo}
       });
 

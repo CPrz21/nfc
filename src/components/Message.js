@@ -1,8 +1,5 @@
 import React, {Component} from 'react';
-import {Modal, Text, Image, TouchableHighlight, ScrollView, View, Alert,StatusBar, StyleSheet} from 'react-native';
-import ErrorIcon from '../assets/img/error_message.png'
-import OkIcon from '../assets/img/ok_message.png'
-import OkFB from '../assets/img/thumbs_up.png'
+import {Modal, Text, Image, TouchableHighlight, View,StatusBar, StyleSheet} from 'react-native';
 
 export default class ModalMessage extends Component {
   state = {
