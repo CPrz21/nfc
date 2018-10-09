@@ -10,6 +10,9 @@ import {
   Button
 } from 'react-native';
 import ImagePicker from 'react-native-image-picker';
+const axios = require('axios');
+import {aws} from '../keys/keys'
+import {RNS3} from 'react-native-aws3'
 
 export default class App extends Component {
     constructor(props) {
@@ -18,7 +21,8 @@ export default class App extends Component {
 
         this.state = {
             avatarSource: null,
-            videoSource: null
+            videoSource: null,
+            load:false,
         };
     }
   
@@ -35,7 +39,7 @@ export default class App extends Component {
       };
 
     ImagePicker.showImagePicker(options, (response) => {
-
+      console.log(response);
       if (response.didCancel) {
         console.log('User cancelled photo picker');
       }
@@ -46,14 +50,62 @@ export default class App extends Component {
         console.log('User tapped custom button: ', response.customButton);
       }
       else {
-        let source = { uri: response.uri };
-
-        // You can also display the image using data:
-        //let source = { uri: 'data:image/jpeg;base64,' + response.data };
+        const file = { 
+          uri: response.uri,
+          name: response.fileName,
+          type: response.type
+        };
+        
+        const options ={
+          keyPrefix:'s3/',
+          bucket:'bt7-photo-booth',
+          region:'us-east-2',
+          accessKey:aws.accessKeyID,
+          secretKey:aws.secretAccessKey,
+          successActionStatus:201
+        }
 
         this.setState({
-          avatarSource: source
+          load:true
         });
+
+        RNS3.put(file, options).then(response => {
+          if (response.status === 201){
+            fetch('https://cpbuaenv59.execute-api.us-east-2.amazonaws.com/staging/users/posts',{
+            method: "POST",
+            body: JSON.stringify({"url":response.body.postResponse.location,"rfid":'04BDEC12524980'}),
+            headers: {
+            'Content-Type': 'application/json'
+            },
+            }).then(response=>{
+              return response.json();
+            })
+            .then(res=>{
+              console.log(res);
+              var newFile = {
+                uri:res.Location
+              }
+              this.setState({
+                avatarSource: newFile,
+                load:true
+              });
+            }).catch(error => console.error('Error:', error));
+          }else{
+            alert('Error al subir imagen');
+          }
+
+        });
+      
+     
+      // formData.append('data', response)
+      // axios.post(apiUrl, formData, {
+      //   headers: {
+      //     'Content-Type': response.type
+      //   }
+      // }).catch((error) => {
+      //   console.log(error.response);
+      // });
+
       }
     });
   }
@@ -64,7 +116,10 @@ export default class App extends Component {
 
           <TouchableOpacity onPress={() => this.selectPhotoTapped()}>
             <View style={[styles.avatarContainer,styles.avatar]}>
-            { this.state.avatarSource === null ? <Text style={styles.PhotoTxt}>Seleccciona la foto</Text> :
+            {/* { this.state.avatarSource === null ? <Text style={styles.PhotoTxt}>Seleccciona la foto</Text> :
+              <Image style={styles.avatar} source={this.state.avatarSource} />
+            } */}
+            { this.state.avatarSource === null ? <Text style={styles.PhotoTxt}>{this.state.load===false ? 'Seleccione la foto' : 'Cargando foto...'}</Text> :
               <Image style={styles.avatar} source={this.state.avatarSource} />
             }
             </View>
@@ -75,7 +130,7 @@ export default class App extends Component {
           color="#001F45"
           title="Compartir Foto"
           onPress={()=>{
-            console.log('hola');
+            alert('imagen compartida!')
           }}
           />
       </View>

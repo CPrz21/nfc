@@ -18,6 +18,8 @@ import ScanLogo from '../assets/img/scan.png'
 import OkIcon from '../assets/img/ok_message.png'
 import ErrorIcon from '../assets/img/error_message.png'
 import Load from '../assets/img/load.gif'
+import ModalMessage from '../components/Message'
+import FBLoginButton from '../components/FBLoginButton'
 
 const ErrorColor='#E24942',
       OkColor='#30B716';
@@ -44,7 +46,6 @@ export default class Registro extends Component {
             enabled: false,
             tag: {},
             detected:false,
-            modalVisible: false,
             MessageBg:null,
             MessageIcon:null,
             MessageTxt:null
@@ -146,31 +147,32 @@ export default class Registro extends Component {
 
         fetch(`https://cpbuaenv59.execute-api.us-east-2.amazonaws.com/staging/users?rfid=${tag.id}`)
         .then(response => {
-        return response.json();
-        })
-        .then(data => {
-        if (data){
+            if (response.status === 200){
             this.setState({
                 tag,
                 detected:false,
-                modalVisible:true,
+                // modalVisible:true,
                 MessageBg:OkColor,
                 MessageIcon:OkIcon,
                 MessageTxt:'Tag identificado'
             });
+            this.refs.modal.show();
             this.props.navigation.navigate('Photo', {
-                userInfo:data
+                userInfo:JSON.parse(response._bodyInit)
             });
-        }else{
-            this.setState({
-                tag,
-                detected:false,
-                modalVisible:true,
-                MessageBg:ErrorColor,
-                MessageIcon:ErrorIcon,
-                MessageTxt:'Tag no identificado'
-            });
-        }
+            }else{
+                this.setState({
+                    tag,
+                    detected:false,
+                    //modalVisible:true,
+                    MessageBg:ErrorColor,
+                    MessageIcon:ErrorIcon,
+                    MessageTxt:'Tag no identificado'
+                });
+                this.refs.modal.show();
+            }
+        //     console.log(response);
+        // return response.json();
         }).catch(error => console.error('Error:', error));
     }
 
@@ -213,43 +215,29 @@ export default class Registro extends Component {
         return (
             <View style={styles.mainContainer}>
                 <View style={styles.content}>
-                    <Modal
-                    animationType="slide"
-                    transparent={false}
-                    visible={this.state.modalVisible}
-                    onShow={()=>{
-                        StatusBar.setBackgroundColor(this.state.MessageBg, true);
-                        setTimeout(()=>{
-                            StatusBar.setBackgroundColor('#001F45', true);
-                            this.setModalVisible(!this.state.modalVisible);
-                        },1500);
-                    }}
-                    onRequestClose={() => {
-                        StatusBar.setBackgroundColor('#001F45', true);
-                        this.setModalVisible(!this.state.modalVisible);
-                    }}>
-                        <View style={[styles.modalContainer,{backgroundColor:this.state.MessageBg}]}>
-                            <View style={styles.modalContent}>
-                                <Image
-                                source={this.state.MessageIcon}
-                                />
-
-                                <TouchableHighlight
-                                    onPress={() => {
-                                        StatusBar.setBackgroundColor(this.state.MessageBg, true);
-                                        this.setModalVisible(!this.state.modalVisible);
-                                    }}>
-                                    <Text style={styles.modalText}>{this.state.MessageTxt}</Text>
-                                </TouchableHighlight>
-                            </View>
-                        </View>
-                    </Modal>
-                
                     <Image style={styles.nfcImg} source={ScanLogo} resizeMode="contain"/>
+                    { this.state.enabled && 
                     <Text style={styles.message}>Acerque pulsera al dispositivo</Text>
+                    }
+                    { !this.state.enabled &&
+                        <View>
+                            <Text style={styles.message}>NFC de dispositivo esta apagado</Text>
+                            <Button
+                            onPress={this._goToNfcSetting}
+                            title="Ir a ajustes de NFC"
+                            color="#001F45"
+                            />
+                        </View>
+                    }
+                    {/* <Text style={styles.message}>Acerque pulsera al dispositivo</Text> */}
                     { this.state.detected && 
                     <Image source={Load}/>
                     }
+
+                    {/* <ModalMessage container={this} ref = "modal" bgColor="#3b5998"/> */}
+
+                    <ModalMessage container={this} ref = "modal" bgColor={this.state.MessageBg} message={this.state.MessageTxt} icon={this.state.MessageIcon}/>
+                    <FBLoginButton/>
                 </View>
             </View>
         )

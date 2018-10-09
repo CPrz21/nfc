@@ -12,7 +12,7 @@ export default class FBShareButton extends Component {
         super(props);
         const shareLinkContent = {
             contentType: 'link',
-            contentUrl: 'https://bt7festival.com/',
+            contentUrl: 'https://s3.us-east-2.amazonaws.com/bt7-photo-booth/281ee714-944d-4969-b25f-a80f0fe57203.png',
             contentDescription: 'Wow, check out this great site BT7!'
         };
         
